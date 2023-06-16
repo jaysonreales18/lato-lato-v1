@@ -3,14 +3,12 @@
 <head>
     <meta name="author" content="Senpai">
     <meta name="description" content="Philippines Lato-lato">
-
     <title>Lato-lato developed Jayson</title>
     <style>
         body {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             margin: 0 auto;
             height: 100vh;
             width: 100vw;
@@ -21,9 +19,12 @@
         }
 
         .line {
-            background: #000;
+            background: #d4ff00;
             height: 100%;
             width: 20px;
+            margin: 0 auto;
+            position: absolute;
+            z-index: 1;
         }
 
         .container {
@@ -32,25 +33,15 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            max-width: 100%;
-            max-height: 100%;
             margin: 0 auto;
-            width: 620px;
         }
 
-        /* .line {
-            position: absolute;
-            height: 100%;
-            width: 20px;
-            
-            margin: 0 auto;
-        } */
-
         h1 {
+            font-size: 4rem;
             letter-spacing: 1px;
             position: absolute;
             top: 0;
-            margin: 100px auto;
+            margin: 200px auto;
         }
 
         #ball1 {
@@ -60,9 +51,8 @@
             border-radius: 50%;
             background-color: #4158D0;
             background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
-
         }
-        
+
         #ball2 {
             position: absolute;
             width: 80px;
@@ -70,16 +60,16 @@
             border-radius: 50%;
             background-color: #FFE53B;
             background-image: linear-gradient(147deg, #FFE53B 0%, #FF2525 74%);
-
         }
 
         .sounds {
-            margin-top: 200px;
+            position: relative;
+            margin-top: 300px;
             display: flex;
             gap: 10px;
         }
 
-        button {
+        .sound-button {
             padding: 15px 25px;
             outline: none;
             border: none;
@@ -89,131 +79,154 @@
             cursor: pointer;
         }
 
+        .sound-button.selected {
+            background-color: #f59e0b !important;
+        }
+
         #startButton {
             background: #16a34a;
             color: #f5f5f5;
+            padding: 15px 25px;
+            outline: none;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .sound-button {
+                padding: 8px 15px;
+            }
         }
     </style>
 </head>
 <body>
-   
     <div class="line"></div>
     <h1>LATO-LATO</h1>
     <div class="container">
         <div id="ball1"></div>
         <div id="ball2"></div>
-        
+
         <!-- Add buttons for sound effects -->
         <div class="sounds">
-            <button onclick="handleSoundSelection('pipe-hit')">Pipe Hit</button>
-            <button onclick="handleSoundSelection('grunt')">Grunt</button>
-            <button onclick="handleSoundSelection('sheesh')">Sheesh</button>
-            <button onclick="handleSoundSelection('click')">Click</button>
-            <button onclick="handleSoundSelection('click-game')">Click Game</button>
+            <button id="pipe-hit" class="sound-button" onclick="handleSoundSelection('pipe-hit')">Pipe Hit</button>
+            <button id="grunt" class="sound-button" onclick="handleSoundSelection('grunt')">Grunt</button>
+            <button id="sheesh" class="sound-button" onclick="handleSoundSelection('sheesh')">Sheesh</button>
+            <button id="click" class="sound-button" onclick="handleSoundSelection('click')">Click</button>
+            <button id="click-game" class="sound-button" onclick="handleSoundSelection('click-game')">Click Game</button>
             <!-- Add a button to initiate the animation and sound playback -->
             <button id="startButton" onclick="handleClick()">Start</button>
         </div>
-    
     </div>
-
 
     <script>
         var ball1 = document.getElementById('ball1');
-var ball2 = document.getElementById('ball2');
-var distance = 600; // Distance between the balls
-var speed1 = 5; // Speed of ball1
-var speed2 = -6; // Speed of ball2
-var sounds = {
-    'pipe-hit': new Audio('./sounds/pipe-hit.mp3'), // Replace with the path to your collision sound file
-    'grunt': new Audio('./sounds/grunt.mp3'),
-    'sheesh': new Audio('./sounds/sheesh.mp3'),
-    'click': new Audio('./sounds/click.mp3'),
-    'click-game': new Audio('./sounds/click-game.mp3'),
-};
-var isAnimating = false;
-var selectedSound = 'pipe-hit'; // Default sound effect
+        var ball2 = document.getElementById('ball2');
+        var distance = 500; // Distance between the balls
+        var speed1 = 5; // Speed of ball1
+        var speed2 = -6; // Speed of ball2
+        var sounds = {
+            'pipe-hit': new Audio('./sounds/pipe-hit.mp3'), // Replace with the path to your collision sound file
+            'grunt': new Audio('./sounds/grunt.mp3'),
+            'sheesh': new Audio('./sounds/sheesh.mp3'),
+            'click': new Audio('./sounds/click.mp3'),
+            'click-game': new Audio('./sounds/click-game.mp3'),
+        };
+        var isAnimating = false;
+        var selectedSound = 'pipe-hit'; // Default sound effect
 
-// Function to play the selected sound effect
-function playSound() {
-    var sound = sounds[selectedSound];
-    sound.currentTime = 0; // Reset the sound to the beginning
-    sound.play();
-}
+        // Function to play the selected sound effect
+        function playSound() {
+            var sound = sounds[selectedSound];
+            sound.currentTime = 0; // Reset the sound to the beginning
+            sound.play();
+        }
 
-// Preload the sound effects
-Object.values(sounds).forEach(function(sound) {
-    sound.load();
-});
+        // Preload the sound effects
+        Object.values(sounds).forEach(function(sound) {
+            sound.load();
+        });
 
-function stopAnimation() {
-    cancelAnimationFrame(animationFrame);
-}
+        function stopAnimation() {
+            cancelAnimationFrame(animationFrame);
+        }
 
-// Store the animation frame ID in a variable
-var animationFrame;
+        // Store the animation frame ID in a variable
+        var animationFrame;
 
-function animateBalls() {
-    // Update the position of the balls and handle collision
+        function animateBalls() {
+            // Update the position of the balls and handle collision
 
-    // Update the position of ball1
-    var pos1 = parseInt(ball1.style.left) || 0;
-    pos1 += speed1;
-    ball1.style.left = pos1 + 'px';
+            // Update the position of ball1
+            var pos1 = parseInt(ball1.style.left) || 0;
+            pos1 += speed1;
+            ball1.style.left = pos1 + 'px';
 
-    // Update the position of ball2
-    var pos2 = parseInt(ball2.style.left) || distance;
-    pos2 += speed2;
-    ball2.style.left = pos2 + 'px';
+            // Update the position of ball2
+            var pos2 = parseInt(ball2.style.left) || distance;
+            pos2 += speed2;
+            ball2.style.left = pos2 + 'px';
 
-    // Check if the balls collide
-    if (Math.abs(pos1 - pos2) < 80) { // Assuming the ball diameter is 80px
-        // Play the sound
-        playSound();
+            // Check if the balls collide
+            if (Math.abs(pos1 - pos2) < 80) { // Assuming the ball diameter is 80px
+                // Play the sound
+                playSound();
 
-        // Reverse the direction of both balls
-        speed1 = -speed1;
-        speed2 = -speed2;
-    }
+                // Reverse the direction of both balls
+                speed1 = -speed1;
+                speed2 = -speed2;
+            }
 
-    // Check if the balls have reached the edges
-    if (pos1 <= 0 || pos1 >= distance) {
-        speed1 = -speed1;
-    }
-    if (pos2 <= 0 || pos2 >= distance) {
-        speed2 = -speed2;
-    }
+            // Check if the balls have reached the edges
+            if (pos1 <= 0 || pos1 >= distance) {
+                speed1 = -speed1;
+            }
+            if (pos2 <= 0 || pos2 >= distance) {
+                speed2 = -speed2;
+            }
 
-    // Call requestAnimationFrame recursively
-    animationFrame = requestAnimationFrame(animateBalls);
-}
+            // Call requestAnimationFrame recursively
+            animationFrame = requestAnimationFrame(animateBalls);
+        }
 
-function handleClick() {
-    var button = document.getElementById('startButton');
+        function handleClick() {
+            var button = document.getElementById('startButton');
 
-    if (!isAnimating) {
-        // Play the sound
-        playSound();
+            if (!isAnimating) {
+                // Play the sound
+                playSound();
 
-        // Start the animation
-        animateBalls();
+                // Start the animation
+                animateBalls();
 
-        // Update button text and state
-        button.innerText = 'Stop';
-        isAnimating = true;
-    } else {
-        // Stop the animation
-        stopAnimation();
+                // Update button text and state
+                button.innerText = 'Stop';
+                button.style.backgroundColor = '#dc2626';
+                isAnimating = true;
+            } else {
+                // Stop the animation
+                stopAnimation();
 
-        // Update button text and state
-        button.innerText = 'Start';
-        isAnimating = false;
-    }
-}
+                // Update button text and state
+                button.innerText = 'Start';
+                button.style.backgroundColor = '#16a34a';
+                isAnimating = false;
+            }
+        }
 
-function handleSoundSelection(soundEffect) {
-    selectedSound = soundEffect;
-}
+        function handleSoundSelection(soundEffect) {
+            selectedSound = soundEffect;
 
+            // Remove the 'selected' class from all buttons
+            var buttons = document.getElementsByClassName('sound-button');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('selected');
+            }
+
+            // Add the 'selected' class to the clicked button
+            var selectedButton = document.getElementById(soundEffect);
+            selectedButton.classList.add('selected');
+        }
     </script>
 </body>
 </html>
